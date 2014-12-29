@@ -37,14 +37,14 @@
   ([port] (connect port "localhost"))
   ([port host]
      (let [socket (new net.Socket)
-           [opener buffer] (repeatedly 2 chan)
+           buffer (chan)
            write (chan (dropping-buffer 1))
            read (chan (sliding-buffer 1))
            socket-chan
            (reify
              proto/ReadPort
              (take! [_ fn-handler]
-               (proto/take! read fn-handler false))
+               (proto/take! read fn-handler))
              proto/WritePort
               (put! [_ val fn-handler]
                 (proto/put! write val fn-handler))
