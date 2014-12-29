@@ -1,38 +1,36 @@
 (ns mpd.core
   (:require
-   [mpd.socket :as socket]
-   [clojure.string :refer [split]]
-   [cljs.core.async :as async :refer (chan <! >! put! close!)])
-  (:require-macros [cljs.core.async.macros :refer (go go-loop)]))
+   [com.stuartsierra.component :as component]
+   [mpd.modules :as modules]
+   [mpd.controllers.controls :refer [control-event]]
+   [mpd.controllers.post-controls :refer [post-control-event!]]
+   [mpd.components.app :as app]))
 
 (extend-type js/RegExp
   cljs.core/IFn
   (-invoke ([this s] (re-matches this s))))
 
-(def socket-chan (socket/connect 6600))
-(def event-bus (chan))
+(defonce state {:foo :bar})
 
-(go-loop []
-  (let [command (<! event-bus)]
-    (>! socket-chan (str (name command) "\n"))
-    (loop [data ""]
-      (let [data (+ data (<! socket-chan))
-            lines (split data #"\n")]
-        (condp some lines
-          #"^ACK"
-          (.log js/console "ACK")
+(defn new-system
+  [& {:keys [port host target state]}]
+  (-> (component/system-map
+       :socket (modules/new-socket :port port
+                                   :host host)
+       :root-cursor (modules/new-root-cursor :init-val state)
+       :om (modules/new-om-root :root-component app/root
+                                :options {:target target})
+       :event-bus (modules/new-event-bus :controls control-event
+                                         :post-controls! post-control-event!))
+      (component/system-using
+       {:om {:root-cursor :root-cursor
+             :event-bus :event-bus}
+        :event-bus {:root-cursor :root-cursor
+                    :socket :socket}})))
 
-          #"^OK MPD.*"
-          (.log js/console "OK MPD!")
+(def ^:dynamic system
+  (new-system :port 6600
+              :target (. js/document (getElementById "app"))
+              :state state))
 
-          #"^OK$"
-          (.log js/console "OK")
-
-          ;; else
-          (recur data))))
-    (recur)))
-
-(aset js/document "onclick"
-      (fn []
-        (.log js/console "Yes?")
-        (put! event-bus :status)))
+(set! system (component/start system))

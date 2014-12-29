@@ -12,6 +12,8 @@
                  [com.facebook/react "0.12.2.1"]
                  [sablono "0.2.22"]
                  [kibu/component "0.2.3-SNAPSHOT"]
+                 [prismatic/schema "0.3.3"]
+                 [prismatic/om-tools "0.3.9"]
 
                  ;; dev
                  [com.cemerick/piggieback "0.1.3"]

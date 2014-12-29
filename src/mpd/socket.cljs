@@ -1,4 +1,7 @@
 (ns mpd.socket
+  "core.async over NodeJS net.Socket
+
+   Insparation from https://gist.github.com/eggsby/6102537"
   (:require
    [cljs.core.async.impl.protocols :as proto]
    [cljs.core.async :as async :refer (chan <! >! put! close!)])
@@ -7,10 +10,9 @@
 (def ^:private net (js/require "net"))
 
 (defn connect
-  "net.Socket as a core.async channel
-  returns a channel which delivers the socket chan then closes
+  "Initializes a new net.Socket and connects to the supplied address and port
 
-  Based on https://gist.github.com/eggsby/6102537"
+  Returns a core.async channel"
   ([port] (connect port "localhost"))
   ([port host]
      (let [socket (new net.Socket)
