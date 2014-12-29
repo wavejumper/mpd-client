@@ -8,7 +8,13 @@
   "Root component of application"
   [data owner [:shared event-bus]]
 
-  (render [_]
-          (.log js/console "Rendering")
+  (render
+   [_]
+
    (html
-    [:div "Hello world!"])))
+    [:div
+     [:div {:on-click #(async/put! event-bus [:mpd/play])}
+      "Play"]
+
+     [:div {:on-click #(async/put! event-bus [:mpd/pause])}
+      "Pause"]])))

@@ -6,9 +6,6 @@
    [mpd.controllers.post-controls :refer [post-control-event!]]
    [mpd.components.app :as app]))
 
-(extend-type js/RegExp
-  cljs.core/IFn
-  (-invoke ([this s] (re-matches this s))))
 
 (defonce state {:foo :bar})
 
