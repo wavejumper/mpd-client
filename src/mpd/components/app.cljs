@@ -14,7 +14,7 @@
     [:div
      [:pre (pr-str status)]
      [:div {:on-click #(async/put! event-bus [:mpd/play])}
-      "Play"]
+      "Play!!"]
 
      [:div {:on-click #(async/put! event-bus [:mpd/pause])}
       "Pause"]])))

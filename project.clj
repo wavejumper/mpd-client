@@ -13,30 +13,33 @@
                  [sablono "0.2.22"]
                  [kibu/component "0.2.3-SNAPSHOT"]
                  [prismatic/schema "0.3.3"]
-                 [prismatic/om-tools "0.3.9"]
+                 [prismatic/om-tools "0.3.9"]]
 
-                 ;; dev
-                 [com.cemerick/piggieback "0.1.3"]
-                 [org.bodil/cljs-noderepl "0.1.11"]
-                 [figwheel "0.2.0-SNAPSHOT"]
-                 [weasel "0.4.2"]]
+  :profiles
+  {:dev {:dependencies [[com.cemerick/piggieback "0.1.3"]
+                        [org.bodil/cljs-noderepl "0.1.11"]
+                        [figwheel "0.2.0-SNAPSHOT"]
+                        [weasel "0.4.2"]]
 
-  :plugins [[lein-node-webkit-build "0.1.6"]
-            [org.bodil/lein-noderepl "0.1.11"]
-            [lein-cljsbuild "1.0.3"]
-            [lein-figwheel "0.2.0-SNAPSHOT"]]
+         :plugins [[lein-node-webkit-build "0.1.6"]
+                   [org.bodil/lein-noderepl "0.1.11"]
+                   [lein-cljsbuild "1.0.3"]
+                   [lein-figwheel "0.2.0-SNAPSHOT"]]
 
-  :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+         :source-paths ["src/" "dev-src/"]
 
-  :node-webkit-build {:root "resources/public"}
+         :repl-options {:init-ns mpd.repl
+                        :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
-  :figwheel {:http-server-root "public"
-             :server-port 3449
-             :css-dirs ["resources/public/css"]}
+         :node-webkit-build {:root "resources/public"}
 
-  :cljsbuild {:builds [{:id "dev"
-                        :source-paths ["src/"]
-                        :compiler {:output-to "resources/public/js/compiled/app.js"
-                                   :output-dir "resources/public/js/compiled/out"
-                                   :optimizations :none
-                                   :source-map true}}]})
+         :figwheel {:http-server-root "public"
+                    :server-port 3449
+                    :css-dirs ["resources/public/css"]}
+
+         :cljsbuild {:builds [{:id "dev"
+                               :source-paths ["src/" "dev-src/"]
+                               :compiler {:output-to "resources/public/js/compiled/app.js"
+                                          :output-dir "resources/public/js/compiled/out"
+                                          :optimizations :none
+                                          :source-map true}}]}}})
