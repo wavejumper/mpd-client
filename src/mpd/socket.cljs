@@ -1,14 +1,12 @@
 (ns mpd.socket
-  "core.async over NodeJS net.Socket
-
-   Insparation from https://gist.github.com/eggsby/6102537"
+  "core.async over NodeJS net.Socket"
   (:require
    [clojure.string :refer (split)]
    [cljs.core.async.impl.protocols :as proto]
    [cljs.core.async :as async :refer (chan <! >! put! close!
                                            dropping-buffer
                                            sliding-buffer)])
-  (:require-macros [cljs.core.async.macros :refer (go go-loop)]))
+  (:require-macros [cljs.core.async.macros :refer (go go-loop alt!)]))
 
 (def ^:private net (js/require "net"))
 
@@ -30,57 +28,72 @@
                                  filter-ack
                                  parse-response))
 
+(defn event->command [event]
+  (str (name event) "\n"))
+
+(defn- create-socket [port host]
+  (let [socket (new net.Socket)]
+    (.connect socket port host)
+    (.setEncoding socket "utf8")
+    socket))
+
+(defn- close-socket [socket]
+  (.end socket)
+  socket)
+
+(defn- socket-chan [read-ch write-ch & [{:keys [on-close]}]]
+  (reify
+    proto/ReadPort
+    (take! [_ fn-handler]
+      (proto/take! read-ch fn-handler))
+    proto/WritePort
+    (put! [_ val fn-handler]
+      (proto/put! write-ch val fn-handler))
+    proto/Channel
+    (close! [_]
+      (do (proto/close! read-ch)
+          (proto/close! write-ch)
+          (when on-close
+            (on-close))))))
+
 (defn connect
   "Connects to the specified MPD server
 
   Returns a core.async channel"
   ([port] (connect port "localhost"))
   ([port host]
-     (let [socket (new net.Socket)
-           buffer (chan)
-           write (chan (dropping-buffer 1))
-           read (chan (sliding-buffer 1))
-           socket-chan
-           (reify
-             proto/ReadPort
-             (take! [_ fn-handler]
-               (proto/take! read fn-handler))
-             proto/WritePort
-              (put! [_ val fn-handler]
-                (proto/put! write val fn-handler))
-              proto/Channel
-              (close! [_]
-                (do (proto/close! read)
-                    (proto/close! write)
-                    (.end socket))))]
+     (let [socket (create-socket port host)
+           read-ch (chan (sliding-buffer 1))
+           write-ch (chan (dropping-buffer 1) (map event->command))
+           buffer-ch (chan)
+           socket-ch (socket-chan read-ch
+                                  write-ch
+                                  {:on-close (fn [] close-socket socket)})]
+
        (go-loop []
-          (.write socket (<! write))
-          (recur))
+         (.write socket (<! write-ch))
+         (recur))
 
-        (go-loop [data ""]
-          (let [data (+ data (<! buffer))
-                lines (split data #"\n")]
-            (condp some lines
+       (.on socket "data"
+            (fn [data] (put! buffer-ch (str data))))
 
-              #"^OK MPD.*"
-              (recur "")
+       (go-loop [data ""]
+         (let [data (+ data (<! buffer-ch))
+               lines (split data #"\n")]
+           (condp some lines
 
-              #"^ACK"
-              (do
-                (.log js/console "ACK")
-                (>! read [:ack data])
-                (recur ""))
+             #"^OK MPD.*"
+             (recur "")
 
-              #"^OK$"
-              (do
-                (.log js/console "OK")
-                (>! read [:ok lines])
-                (recur ""))
+             #"^ACK"
+             (do (>! read-ch [:ack data])
+                 (recur ""))
 
-              ;; else
-              (recur data))))
-        (.on socket "data"
-             (fn [data]
-               (put! buffer (str data))))
-        (.connect socket port host)
-        socket-chan)))
+             #"^OK$"
+             (do (>! read-ch [:ok lines])
+                 (recur ""))
+
+             ;; else
+             (recur data))))
+
+       socket-ch)))

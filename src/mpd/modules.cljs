@@ -4,7 +4,7 @@
             [com.stuartsierra.component :as component]
             [om.core :as om :include-macros true]
             [cljs.core.async :as async :refer (chan <! >! close!)])
-(:require-macros [cljs.core.async.macros :refer (go-loop)]))
+(:require-macros [cljs.core.async.macros :refer (go-loop alt!)]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Socket component
@@ -48,6 +48,28 @@
 (defn new-event-bus
   [& {:keys [controls post-controls!] :as opts}]
   (map->EventBus opts))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Scheduler
+
+(defrecord Scheduler [timeout scheduled-fn]
+  component/Lifecycle
+  (start [component]
+    (let [close-ch (chan)]
+      (go-loop []
+        (scheduled-fn component)
+        (alt!
+          (async/timeout timeout) ([_] (recur))
+          close-ch ([_] nil)))
+      (assoc component :close-ch close-ch)))
+
+  (stop [component]
+    (when-let [close-ch (:close-ch component)]
+      (close! close-ch)
+      (dissoc component :close-ch))))
+
+(defn new-scheduler [& {:keys [timeout scheduled-fn] :as opts}]
+  (map->Scheduler opts))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RootCursor component

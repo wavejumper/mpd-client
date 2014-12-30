@@ -10,7 +10,6 @@
 
   (render
    [_]
-
    (html
     [:div
      [:div {:on-click #(async/put! event-bus [:mpd/play])}
