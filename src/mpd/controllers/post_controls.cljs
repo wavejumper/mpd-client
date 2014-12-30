@@ -7,7 +7,9 @@
 
 (defmethod post-control-event! :default [[event & _] com _ _]
   (let [socket (:socket com)]
-    (put! socket event)))
+    (go
+      (>! socket event)
+      (<! socket))))
 
 (defmethod post-control-event! :mpd/status [[event & _] com _ _]
   (let [socket (:socket com)

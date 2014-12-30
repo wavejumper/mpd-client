@@ -1,7 +1,8 @@
 (ns mpd.socket
   "core.async over NodeJS net.Socket"
   (:require
-   [clojure.string :refer (split)]
+   [cljs.reader :as reader]
+   [clojure.string :refer (split trim)]
    [cljs.core.async.impl.protocols :as proto]
    [cljs.core.async :as async :refer (chan <! >! put! close!
                                            dropping-buffer
@@ -14,22 +15,19 @@
   cljs.core/IFn
   (-invoke ([this s] (re-matches this s))))
 
-(defn parse-response [data]
+(defn parse-line [data]
   (let [[k & rest] (split data #":")]
-    [(keyword k) (apply str rest)]))
+    (when-let [k (keyword k)]
+      [k (reader/read-string (trim (apply str rest)))])))
 
-(def filter-ok
-  (filter #"^OK.*"))
+(defn parse-response [data]
+  (into {} (->> data
+                (remove #"^ACK")
+                (remove #"^OK.*")
+                (map parse-line))))
 
-(def filter-ack
-  (filter #"^ACK"))
-
-(def filter-parse-response (comp filter-ok
-                                 filter-ack
-                                 parse-response))
-
-(defn event->command [event]
-  (str (name event) "\n"))
+(defn event->command [event & args]
+  (str (name event) " " (clojure.string/join args " ") "\n"))
 
 (defn- create-socket [port host]
   (let [socket (new net.Socket)]
@@ -63,7 +61,7 @@
   ([port] (connect port "localhost"))
   ([port host]
      (let [socket (create-socket port host)
-           read-ch (chan (sliding-buffer 1))
+           read-ch (chan (sliding-buffer 1) (map parse-response))
            write-ch (chan (dropping-buffer 1) (map event->command))
            buffer-ch (chan)
            socket-ch (socket-chan read-ch
@@ -86,11 +84,10 @@
              (recur "")
 
              #"^ACK"
-             (do (>! read-ch [:ack data])
-                 (recur ""))
+             (recur "")
 
              #"^OK$"
-             (do (>! read-ch [:ok lines])
+             (do (>! read-ch lines)
                  (recur ""))
 
              ;; else
