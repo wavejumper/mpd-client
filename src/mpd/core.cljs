@@ -8,7 +8,7 @@
    [mpd.components.app :as app]
    [cljs.core.async :as async]))
 
-(defonce state {:foo :bar})
+(defonce state {:status {}})
 
 (defn new-system
   [& {:keys [port host target state]}]

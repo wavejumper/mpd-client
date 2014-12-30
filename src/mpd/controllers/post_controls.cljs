@@ -6,14 +6,17 @@
   (fn [[event & args] com prev-state state] event))
 
 (defmethod post-control-event! :default [[event & _] com _ _]
-  (let [socket (:socket com)]
-    (go
-      (>! socket event)
-      (<! socket))))
+  ;; by default, send the command to the server
+  ;; if the namespace of the event matches mpd
+  (when (= "mpd" (namespace event))
+    (let [socket (:socket com)]
+      (go
+        (>! socket event)
+        (<! socket)))))
 
 (defmethod post-control-event! :mpd/status [[event & _] com _ _]
   (let [socket (:socket com)
         event-bus (:event-bus com)]
     (go
       (>! socket event)
-      (.log js/console (pr-str (<! socket))))))
+      (>! event-bus [:status (<! socket)]))))

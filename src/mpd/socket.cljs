@@ -54,6 +54,7 @@
           (when on-close
             (on-close))))))
 
+;; TODO: handle connect, close, error, etc
 (defn connect
   "Connects to the specified MPD server
 

@@ -6,12 +6,13 @@
 
 (defcomponentk root
   "Root component of application"
-  [data owner [:shared event-bus]]
+  [[:data status :as app] owner [:shared event-bus]]
 
   (render
    [_]
    (html
     [:div
+     [:pre (pr-str status)]
      [:div {:on-click #(async/put! event-bus [:mpd/play])}
       "Play"]
 
