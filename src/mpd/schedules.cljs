@@ -2,5 +2,5 @@
   (:require [cljs.core.async :as async]))
 
 (defn check-status [owner]
-  (comment (let [event-bus (get-in owner [:event-bus :chan])]
-      (async/put! event-bus [:mpd/status]))))
+  (let [socket (get-in owner [:socket :chan])]
+    (async/put! socket {:command :status})))

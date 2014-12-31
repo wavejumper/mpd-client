@@ -3,7 +3,7 @@
   (:require [mpd.socket :as socket]
             [com.stuartsierra.component :as component]
             [om.core :as om :include-macros true]
-            [cljs.core.async :as async :refer (chan <! >! close!)])
+            [cljs.core.async :as async :refer (chan <! >! close! pub)])
 (:require-macros [cljs.core.async.macros :refer (go-loop alt!)]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -70,6 +70,25 @@
 
 (defn new-scheduler [& {:keys [timeout scheduled-fn] :as opts}]
   (map->Scheduler opts))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defrecord Subscriber [publisher-ch subscriptions topic-fn]
+  component/Lifecycle
+  (start [component]
+    (let [publication-ch (pub (:chan publisher-ch) topic-fn)
+          subs (subscriptions component)]
+      (doseq [[topic sub-fn] subs]
+        (socket/subscribe! publication-ch topic sub-fn))
+      (assoc component :publication-ch publication-ch)))
+
+  (stop [component]
+    (when-let [publication-ch (:publication-ch component)]
+      (close! publication-ch))
+    (dissoc component :publication-ch)))
+
+(defn new-subscriber
+  [& {:keys [publisher-ch subscriptions topic-fn] :as opts}]
+  (map->Subscriber opts))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RootCursor component

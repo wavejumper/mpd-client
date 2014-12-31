@@ -4,7 +4,7 @@
    [cljs.reader :as reader]
    [clojure.string :refer (split trim join)]
    [cljs.core.async.impl.protocols :as proto]
-   [cljs.core.async :as async :refer (chan <! >! put! close! buffer)])
+   [cljs.core.async :as async :refer (chan <! >! put! close! sub buffer)])
   (:require-macros [cljs.core.async.macros :refer (go go-loop alt!)]))
 
 (def ^:private net (js/require "net"))
@@ -17,7 +17,8 @@
 (defn parse-line [data]
   (let [[k & rest] (split data #":")]
     (when-let [k (keyword k)]
-      [k (reader/read-string (trim (apply str rest)))])))
+      ;; TODO: reader?
+      [k (str (trim (join ":" rest)))])))
 
 (defn parse-response [data]
   (->> data
@@ -70,9 +71,9 @@
   ([port] (connect port "localhost"))
   ([port host]
      (let [socket (create-socket port host)
-           process-ch (chan (buffer 1) (map parse-response))
-           write-ch (chan (buffer 1) (map event->command))
-           read-ch (chan (buffer 1))
+           process-ch (chan 10 (map parse-response))
+           write-ch (chan 10 (map event->command))
+           read-ch (chan)
            buffer-ch (chan)
            socket-ch (socket-chan read-ch
                                   write-ch
@@ -83,7 +84,7 @@
          (let [command (<! write-ch)
                block-ch (chan)]
            (.write socket command
-                   (fn [data]
+                   (fn []
                      (go
                        (let [response (<! process-ch)
                              event (command->event command)]
@@ -109,41 +110,19 @@
                (recur ""))
 
              #"^OK$"
-             (do (>! process-ch lines)
-                 (recur ""))
+             (do
+               (>! process-ch lines)
+               (recur ""))
 
              ;; else
              (recur data))))
 
        socket-ch)))
 
-(comment
-  (def publisher (connect 6600))
-
-  (def publication (pub publisher #(:command %)))
-
-  (def sub-one (chan))
-  (def sub-two (chan))
-
-  (sub publication :status sub-one)
-  (sub publication :pause sub-two)
-
-  (go-loop []
-    (>! publisher {:command :status})
-    (<! (timeout 10000))
-    (recur))
-
-  (go-loop []
-    (>! publisher {:command :pause})
-    (<! (timeout 10000))
-    (recur))
-
-  (go-loop []
-    (let [response (<! sub-one)]
-      (.log js/console (pr-str "STATUS: " response))
-      (recur)))
-
-  (go-loop []
-    (let [response (<! sub-two)]
-      (.log js/console (pr-str "PAUSE: " response))
+;; TODO: make into cool macro?
+(defn subscribe! [publication-ch topic sub-fn]
+  (let [sub-ch (chan)]
+    (sub publication-ch topic sub-ch)
+    (go-loop []
+      (sub-fn (<! sub-ch))
       (recur))))

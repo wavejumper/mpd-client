@@ -3,6 +3,7 @@
    [com.stuartsierra.component :as component]
    [mpd.modules :as modules]
    [mpd.schedules :as schedules]
+   [mpd.controllers.subscriptions :refer [subscription-service]]
    [mpd.controllers.controls :refer [control-event]]
    [mpd.controllers.post-controls :refer [post-control-event!]]
    [mpd.components.app :as app]
@@ -21,12 +22,17 @@
                                 :options {:target target})
        :scheduler (modules/new-scheduler :timeout 1000
                                          :scheduled-fn schedules/check-status)
+       :subscriber (modules/new-subscriber :subscriptions subscription-service
+                                           :topic-fn #(:command %))
        :event-bus (modules/new-event-bus :controls control-event
                                          :post-controls! post-control-event!))
       (component/system-using
        {:om {:root-cursor :root-cursor
              :event-bus :event-bus}
-        :scheduler {:event-bus :event-bus}
+        :subscriber {:event-bus :event-bus
+                     :publisher-ch :socket}
+        :scheduler {:event-bus :event-bus
+                    :socket :socket}
         :event-bus {:root-cursor :root-cursor
                     :socket :socket}})))
 
