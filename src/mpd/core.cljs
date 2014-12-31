@@ -8,7 +8,8 @@
    [mpd.components.app :as app]
    [cljs.core.async :as async]))
 
-(defonce state {:status {}})
+(defonce state {:status {}
+                :cache {}})
 
 (defn new-system
   [& {:keys [port host target state]}]
@@ -34,4 +35,15 @@
               :target (. js/document (getElementById "app"))
               :state state))
 
-(set! system (component/start system))
+(defn start-system! []
+  (set! system (component/start system)))
+
+(defn stop-system! []
+  (set! system (component/stop system)))
+
+(defn reset-system! []
+  (when system
+    (stop-system!))
+  (start-system!))
+
+(start-system!)
