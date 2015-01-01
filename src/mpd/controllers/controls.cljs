@@ -3,7 +3,12 @@
 (defmulti control-event
   (fn [[event & args] state] event))
 
-(defmethod control-event :default [_ state] state)
+(defmethod control-event :default [[event & _] state]
+  (.log js/console (str "No control-event for " event))
+  state)
+
+(defmethod control-event :change-view [[_ next-view] state]
+  (assoc state :view next-view))
 
 (defmethod control-event :play [_ state]
   (assoc-in state [:status :state] "play"))

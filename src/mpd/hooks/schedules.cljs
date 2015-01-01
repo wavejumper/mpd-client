@@ -1,4 +1,4 @@
-(ns mpd.schedules
+(ns mpd.hooks.schedules
   (:require [cljs.core.async :as async :refer (put!)]))
 
 (defn check-status [owner]

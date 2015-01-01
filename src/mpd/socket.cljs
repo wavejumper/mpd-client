@@ -80,11 +80,15 @@
            (condp some lines
 
              #"^OK MPD.*"
-             (recur "")
+             (do
+               (>! read-ch {:command :ok-mpd
+                            :args []
+                            :response data})
+               (recur ""))
 
              #"^ACK"
              (do
-               (.log js/console (pr-str "ERR: " data))
+               (.log js/console data)
                (recur ""))
 
              #"^OK$"

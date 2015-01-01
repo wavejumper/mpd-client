@@ -2,8 +2,9 @@
   (:require
    [com.stuartsierra.component :as component]
    [mpd.modules :as modules]
-   [mpd.schedules :as schedules]
-   [mpd.controllers.subscriptions :refer [subscription-service]]
+   [mpd.hooks.schedules :as schedules]
+   [mpd.hooks.subscriptions :refer [subscription-service]]
+   [mpd.hooks.bindings :refer [key-service]]
    [mpd.controllers.controls :refer [control-event]]
    [mpd.controllers.post-controls :refer [post-control-event!]]
    [mpd.components.app :as app]
@@ -11,7 +12,8 @@
 
 (defonce state {:status {}
                 :cache {}
-                :playlist []})
+                :playlist []
+                :view :playlist})
 
 (defn new-system
   [& {:keys [port host target state]}]
@@ -25,6 +27,7 @@
                                            :topic-fn #(:command %))
        :event-bus (modules/new-event-bus :controls control-event
                                          :post-controls! post-control-event!)
+       :key-binder (modules/new-key-binder :key-bindings key-service)
        ;; Schedules
        :status-poll
        (modules/new-scheduler :timeout 1000
@@ -40,6 +43,8 @@
                      :publisher-ch :socket}
         :event-bus {:root-cursor :root-cursor
                     :socket :socket}
+        :key-binder {:socket :socket
+                     :event-bus :event-bus}
         ;; Schedules
         :playlist-poll {:socket :socket}
         :status-poll {:socket :socket}})))

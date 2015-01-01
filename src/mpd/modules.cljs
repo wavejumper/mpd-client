@@ -1,6 +1,7 @@
 (ns mpd.modules
   "Reusable components"
   (:require [mpd.socket :as socket]
+            [mpd.dom :as dom]
             [com.stuartsierra.component :as component]
             [om.core :as om :include-macros true]
             [cljs.core.async :as async :refer (chan <! >! close! pub)])
@@ -89,6 +90,23 @@
 (defn new-subscriber
   [& {:keys [publisher-ch subscriptions topic-fn] :as opts}]
   (map->Subscriber opts))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; KeyBinder
+
+(defrecord KeyBinder [key-bindings]
+  component/Lifecycle
+  (start [component]
+    (assoc component :event (dom/bind-keys! component key-bindings)))
+
+  (stop [component]
+    (when-let [event (:event component)]
+      (dom/unbind-keys! event))
+    (dissoc component :event)))
+
+(defn new-key-binder
+  [& {:keys [key-bindings] :as opts}]
+  (map->KeyBinder opts))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RootCursor component

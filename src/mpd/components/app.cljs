@@ -5,7 +5,7 @@
             [cljs.core.async :as async :refer (put!)]))
 
 (defcomponentk controls
-  [[:data state :as app] [:shared socket]]
+  [[:data state song :as app] [:shared socket]]
 
   (render
    [_]
@@ -22,7 +22,10 @@
       "< "]
 
      [:div {:on-click #(async/put! socket {:command :next})}
-      "> "]])))
+      "> "]
+
+     (when song
+       [:div (str "Now playing: " (:artist song) " - " (:title song))])])))
 
 (defcomponentk playlist
   [[:data playingid playlist :as app] [:shared socket]]
@@ -39,22 +42,50 @@
           [:strong row]
           [:span row])])])))
 
+(defcomponentk view-tabs
+  [[:data view :as app]
+   [:shared event-bus]]
+
+  (render
+   [_]
+   (html
+    [:ul {:key "view-tabs"}
+     [:li
+      {:key "view-playlist"
+       :on-click #(put! event-bus [:change-view :playlist])}
+      (if (= view :playlist)
+        [:strong "Playlist"]
+        [:span "Playlist"])]
+
+     [:li
+      {:key "view-browse"
+       :on-click #(put! event-bus [:change-view :browse])}
+      (if (= view :browse)
+        [:strong "Browse"]
+        [:span "Browse"])]])))
+
 (defcomponentk root
   "Root component of application"
-  [[:data status playlist cache :as app] owner]
+  [[:data view status playlist cache :as app]
+   [:shared event-bus]
+   owner]
 
   (render
    [_]
    (let [playingid (:songid status)]
      (html
       [:div
-       [:pre (pr-str cache)]
        [:pre (pr-str status)]
 
-       (when-let [song (get-in cache [:songid playingid])]
-         [:div (str "Now playing: " (:artist song) " - " (:title song))])
+       (->view-tabs {:view view})
 
-       (->playlist {:playlist playlist
-                    :playingid playingid})
+       (condp = view
+         :playlist
+         (->playlist {:playlist playlist
+                      :playingid playingid})
 
-       (->controls {:state (:state status)})]))))
+         ;; else
+         [:div "No such view " (str view)])
+
+       (->controls {:state (:state status)
+                    :song (get-in cache [:songid playingid])})]))))

@@ -1,4 +1,4 @@
-(ns mpd.controllers.subscriptions
+(ns mpd.hooks.subscriptions
   (:require [cljs.core.async :as async :refer (put!)]))
 
 (defn subscription-service [owner]
