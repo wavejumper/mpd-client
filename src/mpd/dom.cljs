@@ -1,7 +1,7 @@
 (ns mpd.dom
   (:require [goog.events :refer (listen unlisten)]))
 
-(defn bind-keys! [owner key-bindings]
+(defn bind-keys! [key-bindings]
   (listen js/document goog.events.EventType.KEYUP
           (fn [e]
             (.log js/console "KEY: " (.-keyCode e))
