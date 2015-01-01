@@ -1,9 +1,8 @@
 (ns mpd.hooks.bindings
-  (:require [cljs.core.async :as async :refer (put!)])
-  )
+  (:require [cljs.core.async :as async :refer (put!)]))
 
-(def key-service
-  {80 ;; [p]ause
-   (fn [owner]
-     (let [socket (get-in owner [:socket :chan])]
-       (put! socket {:command :pause})))})
+(defn key-service [owner]
+  (let [socket (get-in owner [:socket :chan])
+        event-bus (get-in owner [:event-bus :chan])]
+    {80 ;; [p]ause
+     (fn [_] (put! socket {:command :pause}))}))

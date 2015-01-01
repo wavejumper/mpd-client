@@ -6,7 +6,7 @@
           (fn [e]
             (.log js/console "KEY: " (.-keyCode e))
             (when-let [event-fn (get key-bindings (.-keyCode e))]
-              (event-fn owner)))))
+              (event-fn e)))))
 
 (defn unbind-keys! [event]
   (unlisten event))

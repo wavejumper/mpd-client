@@ -97,7 +97,7 @@
 (defrecord KeyBinder [key-bindings]
   component/Lifecycle
   (start [component]
-    (assoc component :event (dom/bind-keys! component key-bindings)))
+    (assoc component :event (dom/bind-keys! component (key-bindings owner))))
 
   (stop [component]
     (when-let [event (:event component)]
