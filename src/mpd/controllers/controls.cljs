@@ -14,7 +14,14 @@
   (assoc-in state [:status :state] "play"))
 
 (defmethod control-event :pause [_ state]
-  (assoc-in state [:status :state] "pause"))
+  (update-in state [:status :state]
+             #(condp = %
+                "pause" "play"
+                "stop" "stop"
+                "pause")))
+
+(defmethod control-event :stop [_ state]
+  (assoc-in state [:status :state] "stop"))
 
 (defmethod control-event :playid [[event _ args] state]
   (-> state
@@ -35,3 +42,10 @@
     (-> state
         (update-in [:cache :songid] #(merge % songids))
         (assoc :playlist data))))
+
+(defmethod control-event :next [_ state]
+  (assoc-in state [:status :songid]
+            (get-in state [:status :nextsongid])))
+
+(defmethod control-event :clear [[event & _] state]
+  (assoc state :playlist []))

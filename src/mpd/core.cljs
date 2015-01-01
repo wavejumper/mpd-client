@@ -3,10 +3,10 @@
    [com.stuartsierra.component :as component]
    [mpd.modules :as modules]
    [mpd.hooks.schedules :as schedules]
-   [mpd.hooks.subscriptions :refer [subscription-service]]
-   [mpd.hooks.bindings :refer [key-service]]
-   [mpd.controllers.controls :refer [control-event]]
-   [mpd.controllers.post-controls :refer [post-control-event!]]
+   [mpd.hooks.subscriptions :refer (subscription-service)]
+   [mpd.hooks.bindings :refer (key-service)]
+   [mpd.controllers.controls :refer (control-event)]
+   [mpd.controllers.post-controls :refer (post-control-event!)]
    [mpd.components.app :as app]
    [cljs.core.async :as async]))
 

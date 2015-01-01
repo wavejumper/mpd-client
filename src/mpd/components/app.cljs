@@ -5,7 +5,8 @@
             [cljs.core.async :as async :refer (put!)]))
 
 (defcomponentk controls
-  [[:data state song :as app] [:shared socket]]
+  [[:data state song :as app]
+   [:shared socket]]
 
   (render
    [_]
@@ -28,7 +29,8 @@
        [:div (str "Now playing: " (:artist song) " - " (:title song))])])))
 
 (defcomponentk playlist
-  [[:data playingid playlist :as app] [:shared socket]]
+  [[:data playingid playlist :as app]
+   [:shared socket]]
   (render
    [_]
    (html
@@ -67,12 +69,12 @@
 (defcomponentk root
   "Root component of application"
   [[:data view status playlist cache :as app]
-   [:shared event-bus]
-   owner]
+   [:shared event-bus]]
 
   (render
    [_]
-   (let [playingid (:songid status)]
+   (let [state (:state status)
+         playingid (when (not= "stop" state) (:songid status))]
      (html
       [:div
        [:pre (pr-str status)]
@@ -87,5 +89,5 @@
          ;; else
          [:div "No such view " (str view)])
 
-       (->controls {:state (:state status)
+       (->controls {:state state
                     :song (get-in cache [:songid playingid])})]))))

@@ -10,4 +10,7 @@
      :playlistinfo ->event-bus
      :playid ->event-bus
      :play ->event-bus
-     :pause ->event-bus}))
+     :stop ->event-bus
+     :pause ->event-bus
+     :clear ->event-bus
+     :next ->event-bus}))
