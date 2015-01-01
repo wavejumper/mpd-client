@@ -90,6 +90,10 @@
       [:div
        [:pre (pr-str status)]
 
+       [:pre
+        {:width "100px"}
+        (pr-str cache)]
+
        (->view-tabs {:view view})
 
        (condp = view

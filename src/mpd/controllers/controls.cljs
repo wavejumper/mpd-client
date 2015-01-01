@@ -49,3 +49,7 @@
 
 (defmethod control-event :clear [[event & _] state]
   (assoc state :playlist []))
+
+(defmethod control-event :list [[event data _] state]
+  ;; TODO: ???
+  (assoc-in state [:cache :list] data))

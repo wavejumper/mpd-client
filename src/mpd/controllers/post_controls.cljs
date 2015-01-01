@@ -8,6 +8,10 @@
 (defmethod post-control-event! :default [[event & _] com _ _]
   nil)
 
+(defmethod post-control-event! :change-view [_ com _ _]
+  (let [socket (:socket com)]
+    (put! socket {:command :list :args ["album" "group" "artist"]})))
+
 (defmethod post-control-event! :status [[event data _] com _ state]
   (let [event-bus (:event-bus com)
         socket (:socket com)

@@ -13,4 +13,5 @@
      :stop ->event-bus
      :pause ->event-bus
      :clear ->event-bus
+     :list ->event-bus
      :next ->event-bus}))
