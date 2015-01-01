@@ -7,7 +7,6 @@
   :dependencies [[org.clojure/clojure "1.7.0-alpha4"]
                  [org.clojure/clojurescript "0.0-2511"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                 [org.clojure/core.match "0.3.0-alpha4"]
                  [om "0.8.0-beta5"]
                  [com.facebook/react "0.12.2.1"]
                  [sablono "0.2.22"]
@@ -17,6 +16,7 @@
 
   :profiles
   {:dev {:dependencies [[com.cemerick/piggieback "0.1.3"]
+                        [com.cemerick/clojurescript.test "0.3.3"]
                         [org.bodil/cljs-noderepl "0.1.11"]
                         [figwheel "0.2.0-SNAPSHOT"]
                         [weasel "0.4.2"]]
@@ -42,4 +42,13 @@
                                :compiler {:output-to "resources/public/js/compiled/app.js"
                                           :output-dir "resources/public/js/compiled/out"
                                           :optimizations :none
-                                          :source-map true}}]}}})
+                                          :source-map true}}
+
+                              {:id "test"
+                               :source-paths ["src/"]
+                               :compiler {:output-to "target/cljs/testable.js"
+                                          :optimizations :whitespace
+                                          :pretty-print true}}]
+                     :test-commands {"unit-tests" ["node" :runner
+                                                   "this.literal_js_was_evaluated=true"
+                                                   "target/cljs/testable.js"]}}}})
