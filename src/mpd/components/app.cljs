@@ -2,31 +2,41 @@
   (:require [om.core :as om]
             [om-tools.core :refer-macros (defcomponentk)]
             [sablono.core :as html :refer-macros (html)]
-            [cljs.core.async :as async :refer (put!)]))
+            [cljs.core.async :as async :refer (put!)]
+            [mpd.utils :refer (perc ms->minute)]
+            ))
 
 (defcomponentk controls
-  [[:data state song :as app]
+  [[:data status song :as app]
    [:shared socket]]
 
   (render
    [_]
-   (html
-    [:div
-     (if (= "play" state)
-       [:div {:on-click #(async/put! socket {:command :pause})}
-        "Pause"]
+   (let [state (:state status)]
+     (html
+      [:div
+       (if (= "play" state)
+         [:div {:on-click #(async/put! socket {:command :pause})}
+          "Pause"]
 
-       [:div {:on-click #(async/put! socket {:command :play})}
-        "Play!!"])
+         [:div {:on-click #(async/put! socket {:command :play})}
+          "Play!!"])
 
-     [:div {:on-click #(async/put! socket {:command :previous})}
-      "< "]
+       [:div {:on-click #(async/put! socket {:command :previous})}
+        "< "]
 
-     [:div {:on-click #(async/put! socket {:command :next})}
-      "> "]
+       [:div {:on-click #(async/put! socket {:command :next})}
+        "> "]
 
-     (when song
-       [:div (str "Now playing: " (:artist song) " - " (:title song))])])))
+       (when song
+         [:div
+          [:div (str "Now playing: " (:artist song) " - " (:title song))]
+          [:div "[" (ms->minute (:elapsed status)) "/" (ms->minute (:time song)) "]"]
+          [:div {:style {:background-color "pink"
+                         :height "10px"
+                         :width (str (perc (:elapsed status) (:time song)) "%")}}]]
+
+         )]))))
 
 (defcomponentk playlist
   [[:data playingid playlist :as app]
@@ -89,5 +99,5 @@
          ;; else
          [:div "No such view " (str view)])
 
-       (->controls {:state state
+       (->controls {:status status
                     :song (get-in cache [:songid playingid])})]))))

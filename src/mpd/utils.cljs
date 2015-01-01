@@ -82,3 +82,23 @@
   (let [[command & args] (-> data (split #"\n") first trim (split #" "))]
     {:command (keyword command)
      :args (map read-string* args)}))
+
+(defn perc [x y]
+  (.ceil js/Math (* (/ x y) 100) ))
+
+(defn pad
+  "Prepends 0 to x, n - x times"
+  [x n]
+  (let [x (str x)]
+    (if (< (count x) n)
+      (let [padding (- size (count x))]
+        (loop [x x i 0]
+          (if (= i padding)
+            x
+            (recur (+ "0" x) (inc i)))))
+      x)))
+
+(defn ms->minute [x]
+  (str (.floor js/Math (/ x 60))
+       ":"
+       (pad (.ceil js/Math (mod x 60)) 2)))
