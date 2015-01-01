@@ -1,6 +1,6 @@
 # zirconia
 
-![Zirconia](http://i.imgur.com/wMZxV6R.jpg)
+![Zirconia](http://i.imgur.com/wMZxV6Rs.jpg)
 
 zirconia is a node-webkit based MPD client built using Clojurescript. 
 
