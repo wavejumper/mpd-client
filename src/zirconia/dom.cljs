@@ -1,4 +1,4 @@
-(ns mpd.dom
+(ns zirconia.dom
   (:require [goog.events :refer (listen unlisten)]))
 
 (defn bind-keys! [key-bindings]

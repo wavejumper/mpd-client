@@ -1,10 +1,10 @@
-(ns mpd.socket
+(ns zirconia.socket
   "core.async over NodeJS net.Socket"
   (:require
    [clojure.string :refer (split)]
    [cljs.core.async.impl.protocols :as proto]
    [cljs.core.async :as async :refer (chan <! >! put! close! sub buffer)]
-   [mpd.utils :refer [parse-response event->command command->event]])
+   [zirconia.utils :refer [parse-response event->command command->event]])
   (:require-macros [cljs.core.async.macros :refer (go go-loop alt!)]))
 
 (def ^:private net (js/require "net"))

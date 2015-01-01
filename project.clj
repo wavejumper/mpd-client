@@ -1,6 +1,6 @@
-(defproject mpd "0.1.0-SNAPSHOT"
+(defproject zirconia "0.1.0-SNAPSHOT"
   :description "MPD client"
-  :url "http://example.com/FIXME"
+  :url "http://github.com/zirconia"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
@@ -28,7 +28,7 @@
 
          :source-paths ["src/" "dev-src/"]
 
-         :repl-options {:init-ns mpd.repl
+         :repl-options {:init-ns zirconia.repl
                         :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
          :node-webkit-build {:root "resources/public"}

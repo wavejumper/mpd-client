@@ -1,7 +1,7 @@
-(ns mpd.modules
+(ns zirconia.modules
   "Reusable components"
-  (:require [mpd.socket :as socket]
-            [mpd.dom :as dom]
+  (:require [zirconia.socket :as socket]
+            [zirconia.dom :as dom]
             [com.stuartsierra.component :as component]
             [om.core :as om :include-macros true]
             [cljs.core.async :as async :refer (chan <! >! close! pub)])

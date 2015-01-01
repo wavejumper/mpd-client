@@ -1,4 +1,4 @@
-(ns mpd.controllers.controls)
+(ns zirconia.controllers.controls)
 
 (defmulti control-event
   (fn [[event & args] state] event))

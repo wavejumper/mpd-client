@@ -1,10 +1,9 @@
-(ns mpd.components.app
+(ns zirconia.components.app
   (:require [om.core :as om]
             [om-tools.core :refer-macros (defcomponentk)]
             [sablono.core :as html :refer-macros (html)]
             [cljs.core.async :as async :refer (put!)]
-            [mpd.utils :refer (perc ms->minute)]
-            ))
+            [zirconia.utils :refer (perc ms->minute)]))
 
 (defcomponentk controls
   [[:data status song :as app]

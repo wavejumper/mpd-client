@@ -1,4 +1,4 @@
-(ns mpd.repl
+(ns zirconia.repl
   (:require [weasel.repl.websocket]
             [cemerick.piggieback :as pback]))
 

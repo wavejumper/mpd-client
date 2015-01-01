@@ -1,4 +1,4 @@
-(ns mpd.utils
+(ns zirconia.utils
   (:require [clojure.string :refer (split trim join lower-case upper-case)]
             [cljs.reader :as reader]))
 

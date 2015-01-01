@@ -1,4 +1,4 @@
-(ns mpd.hooks.subscriptions
+(ns zirconia.hooks.subscriptions
   (:require [cljs.core.async :as async :refer (put!)]))
 
 (defn subscription-service [owner]

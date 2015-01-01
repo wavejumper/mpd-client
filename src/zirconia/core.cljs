@@ -1,13 +1,13 @@
-(ns mpd.core
+(ns zirconia.core
   (:require
    [com.stuartsierra.component :as component]
-   [mpd.modules :as modules]
-   [mpd.hooks.schedules :as schedules]
-   [mpd.hooks.subscriptions :refer (subscription-service)]
-   [mpd.hooks.bindings :refer (key-service)]
-   [mpd.controllers.controls :refer (control-event)]
-   [mpd.controllers.post-controls :refer (post-control-event!)]
-   [mpd.components.app :as app]
+   [zirconia.modules :as modules]
+   [zirconia.hooks.schedules :as schedules]
+   [zirconia.hooks.subscriptions :refer (subscription-service)]
+   [zirconia.hooks.bindings :refer (key-service)]
+   [zirconia.controllers.controls :refer (control-event)]
+   [zirconia.controllers.post-controls :refer (post-control-event!)]
+   [zirconia.components.app :as app]
    [cljs.core.async :as async]))
 
 (defonce state {:status {}

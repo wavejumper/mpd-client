@@ -1,4 +1,4 @@
-(ns mpd.controllers.post-controls
+(ns zirconia.controllers.post-controls
   (:require [cljs.core.async :as async :refer [<! >! put!]])
   (:require-macros [cljs.core.async.macros :refer (go go-loop)]))
 

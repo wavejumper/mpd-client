@@ -1,4 +1,4 @@
-(ns mpd.hooks.bindings
+(ns zirconia.hooks.bindings
   (:require [cljs.core.async :as async :refer (put!)]))
 
 (defn key-service [owner]
