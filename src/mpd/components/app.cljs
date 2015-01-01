@@ -31,12 +31,13 @@
        (when song
          [:div
           [:div (str "Now playing: " (:artist song) " - " (:title song))]
-          [:div "[" (ms->minute (:elapsed status)) "/" (ms->minute (:time song)) "]"]
-          [:div {:style {:background-color "pink"
-                         :height "10px"
-                         :width (str (perc (:elapsed status) (:time song)) "%")}}]]
-
-         )]))))
+          [:div
+           "[" (ms->minute (:elapsed status)) "/"
+           (ms->minute (:time song)) "]"]
+          [:div
+           {:style {:background-color "pink"
+                    :height "10px"
+                    :width (str (perc (:elapsed status) (:time song)) "%")}}]])]))))
 
 (defcomponentk playlist
   [[:data playingid playlist :as app]

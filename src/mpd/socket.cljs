@@ -75,7 +75,7 @@
             (fn [data] (put! buffer-ch (str data))))
 
        (go-loop [data ""]
-         (let [data (+ data (<! buffer-ch))
+         (let [data (str data (<! buffer-ch))
                lines (split data #"\n")]
            (condp some lines
 

@@ -13,7 +13,9 @@
 (defonce state {:status {}
                 :cache {}
                 :playlist []
-                :view :playlist})
+                :view :playlist
+                :view-settings {:playlist {}
+                                :browse {:browse-by :album}}})
 
 (defn new-system
   [& {:keys [port host target state]}]
