@@ -1,39 +1,17 @@
 (ns mpd.socket
   "core.async over NodeJS net.Socket"
   (:require
-   [cljs.reader :as reader]
-   [clojure.string :refer (split trim join)]
+   [clojure.string :refer (split)]
    [cljs.core.async.impl.protocols :as proto]
-   [cljs.core.async :as async :refer (chan <! >! put! close! sub buffer)])
+   [cljs.core.async :as async :refer (chan <! >! put! close! sub buffer)]
+   [mpd.utils :refer [parse-response event->command command->event]])
   (:require-macros [cljs.core.async.macros :refer (go go-loop alt!)]))
 
 (def ^:private net (js/require "net"))
 
-;; https://gist.github.com/alandipert/2346460
 (extend-type js/RegExp
   cljs.core/IFn
   (-invoke ([this s] (re-matches this s))))
-
-(defn parse-line [data]
-  (let [[k & rest] (split data #":")]
-    (when-let [k (keyword k)]
-      ;; TODO: reader?
-      [k (str (trim (join ":" rest)))])))
-
-(defn parse-response [data]
-  (->> data
-       (remove #"^ACK")
-       (remove #"^OK.*")
-       (map parse-line)
-       (into {})))
-
-(defn event->command [{:keys [command args]}]
-  (str (name command) " " (join " " args) "\n"))
-
-(defn command->event [data]
-  (let [[command & args] (-> data (split #"\n") first trim (split #" "))]
-    {:command (keyword command)
-     :args (map reader/read-string args)}))
 
 (defn- create-socket [port host]
   (let [socket (new net.Socket)]
@@ -63,7 +41,7 @@
           (when on-close
             (on-close))))))
 
-;; TODO: handle connect, close, error, etc
+;; TODO: handle connect, close, error, etc events
 (defn connect
   "Connects to the specified MPD server
 

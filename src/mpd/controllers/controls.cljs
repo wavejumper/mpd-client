@@ -7,3 +7,7 @@
 
 (defmethod control-event :status [[event data] state]
   (assoc state :status data))
+
+(defmethod control-event :playlistid [[event data] state]
+  (let [songid (:id data)]
+    (assoc-in state [:cache :songid songid] data)))

@@ -11,6 +11,9 @@
 (defmethod post-control-event! :status [[event data] com _ state]
   (let [event-bus (:event-bus com)
         socket (:socket com)
-        songid (:songid data)]
+        songid (:songid data)
+        nextsongid (:nextsongid data)]
     (when (and songid (not (get-in state [:cache :songid songid])))
-      (put! socket {:command :playlistid :args [songid]}))))
+      (put! socket {:command :playlistid :args [songid]}))
+    (when (and nextsongid (not (get-in state [:cache :songid nextsongid])))
+      (put! socket {:command :playlistid :args [nextsongid]}))))
