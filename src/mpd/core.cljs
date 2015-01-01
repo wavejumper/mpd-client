@@ -10,7 +10,8 @@
    [cljs.core.async :as async]))
 
 (defonce state {:status {}
-                :cache {}})
+                :cache {}
+                :playlist []})
 
 (defn new-system
   [& {:keys [port host target state]}]
@@ -20,21 +21,28 @@
        :root-cursor (modules/new-root-cursor :init-val state)
        :om (modules/new-om-root :root-component app/root
                                 :options {:target target})
-       :scheduler (modules/new-scheduler :timeout 1000
-                                         :scheduled-fn schedules/check-status)
        :subscriber (modules/new-subscriber :subscriptions subscription-service
                                            :topic-fn #(:command %))
        :event-bus (modules/new-event-bus :controls control-event
-                                         :post-controls! post-control-event!))
+                                         :post-controls! post-control-event!)
+       ;; Schedules
+       :status-poll
+       (modules/new-scheduler :timeout 1000
+                              :scheduled-fn schedules/check-status)
+       :playlist-poll
+       (modules/new-scheduler :timeout 5000
+                              :scheduled-fn schedules/get-playlist))
       (component/system-using
        {:om {:root-cursor :root-cursor
-             :event-bus :event-bus}
+             :event-bus :event-bus
+             :socket :socket}
         :subscriber {:event-bus :event-bus
                      :publisher-ch :socket}
-        :scheduler {:event-bus :event-bus
-                    :socket :socket}
         :event-bus {:root-cursor :root-cursor
-                    :socket :socket}})))
+                    :socket :socket}
+        ;; Schedules
+        :playlist-poll {:socket :socket}
+        :status-poll {:socket :socket}})))
 
 (def ^:dynamic system
   (new-system :port 6600

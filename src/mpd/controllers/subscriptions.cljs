@@ -6,4 +6,7 @@
         ->event-bus (fn [{:keys [command response]}]
                       (put! event-bus [command response]))]
     {:status ->event-bus
-     :playlistid ->event-bus}))
+     :playlistid ->event-bus
+     :playlistinfo ->event-bus
+     :play ->event-bus
+     :pause ->event-bus}))

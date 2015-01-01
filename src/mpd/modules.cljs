@@ -120,8 +120,11 @@
   component/Lifecycle
   (start [component]
     (let [event-bus (get-in component [:event-bus :chan])
+          socket (get-in component [:socket :chan])
           root-cursor (get-in component [:root-cursor :atom])
-          options (assoc-in options [:shared :event-bus] event-bus)]
+          options (-> options
+                      (assoc-in [:shared :event-bus] event-bus)
+                      (assoc-in [:shared :socket] socket))]
       (assoc component :om (om/root root-component root-cursor options))))
 
   (stop [component]
