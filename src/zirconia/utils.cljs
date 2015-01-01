@@ -1,5 +1,5 @@
 (ns zirconia.utils
-  (:require [clojure.string :refer (split trim join lower-case upper-case)]
+  (:require [clojure.string :refer (split trim join lower-case)]
             [cljs.reader :as reader]))
 
 (extend-type js/RegExp
@@ -12,7 +12,7 @@
        (catch js/Error _ (str x))))
 
 (defn camel->lisp
-  "Converts a camelCase string into a lisp-case keyword"
+  "Transforms a camelCase string into a lisp-case keyword"
   [x]
   (-> (name x)
       (.replace #"([a-z])([A-Z])" "$1-$2")
@@ -34,11 +34,6 @@
     (when (keyword k)
       [(camel->lisp k)
        (->> rest (join ":") trim read-string*)])))
-
-(defn lower-case?
-  "Returns if x is a lower-case character"
-  [x]
-  (not= (str x) (upper-case (str x))))
 
 (defn response->edn
   "Transforms a response from server to EDN friendly format
@@ -71,12 +66,12 @@
        (response->edn)))
 
 (defn event->command
-  "Converts an event hash-map with keys :command :args into a raw request"
+  "Transforms an event hash-map with keys :command, :args into a raw request string"
   [{:keys [command args]}]
   (str (name command) " " (join " " args) "\n"))
 
 (defn command->event
-  "Converts a raw request back into its hash-map equivalent"
+  "Transforms a raw request string back into its hash-map equivalent"
   [data]
   (let [[command & args] (-> data (split #"\n") first trim (split #" "))]
     {:command (keyword command)
