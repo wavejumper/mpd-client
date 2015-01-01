@@ -1,4 +1,5 @@
 (ns zirconia.hooks.subscriptions
+  "Topics to be subscribed and initialized by the Subscriber component"
   (:require [cljs.core.async :as async :refer (put!)]))
 
 (defn subscription-service [owner]

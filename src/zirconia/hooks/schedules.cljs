@@ -1,4 +1,5 @@
 (ns zirconia.hooks.schedules
+  "Scheduled tasks to be initialized by the Scheduler component"
   (:require [cljs.core.async :as async :refer (put!)]))
 
 (defn check-status [owner]

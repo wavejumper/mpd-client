@@ -1,4 +1,5 @@
 (ns zirconia.hooks.bindings
+  "Keybindings to be initialized by the KeyBinder component"
   (:require [cljs.core.async :as async :refer (put!)]))
 
 (defn key-service [owner]
