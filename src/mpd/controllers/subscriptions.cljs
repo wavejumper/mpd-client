@@ -3,10 +3,11 @@
 
 (defn subscription-service [owner]
   (let [event-bus (get-in owner [:event-bus :chan])
-        ->event-bus (fn [{:keys [command response]}]
-                      (put! event-bus [command response]))]
+        ->event-bus (fn [{:keys [command args response]}]
+                      (put! event-bus [command response args]))]
     {:status ->event-bus
      :playlistid ->event-bus
      :playlistinfo ->event-bus
+     :playid ->event-bus
      :play ->event-bus
      :pause ->event-bus}))

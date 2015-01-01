@@ -8,7 +8,7 @@
 (defmethod post-control-event! :default [[event & _] com _ _]
   nil)
 
-(defmethod post-control-event! :status [[event data] com _ state]
+(defmethod post-control-event! :status [[event data _] com _ state]
   (let [event-bus (:event-bus com)
         socket (:socket com)
         songid (:songid data)

@@ -11,14 +11,19 @@
 (defmethod control-event :pause [_ state]
   (assoc-in state [:status :state] "pause"))
 
-(defmethod control-event :status [[event data] state]
+(defmethod control-event :playid [[event _ args] state]
+  (-> state
+      (assoc-in [:status :songid] (first args))
+      (assoc-in [:status :state] "play")))
+
+(defmethod control-event :status [[event data _] state]
   (assoc state :status data))
 
-(defmethod control-event :playlistid [[event data] state]
+(defmethod control-event :playlistid [[event data _] state]
   (let [songid (:id data)]
     (assoc-in state [:cache :songid songid] data)))
 
-(defmethod control-event :playlistinfo [[event data] state]
+(defmethod control-event :playlistinfo [[event data _] state]
   (let [songids (->> data
                      (map (fn [x] [(:id x) x]))
                      (into {}))]
