@@ -12,7 +12,7 @@
        (catch js/Error _ (str x))))
 
 (defn camel->lisp
-  "Converts a camelCase string into a lisp-case keyword"
+  "Transforms a camelCase string into a lisp-case keyword"
   [x]
   (-> (name x)
       (.replace #"([a-z])([A-Z])" "$1-$2")
