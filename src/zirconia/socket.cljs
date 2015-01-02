@@ -49,6 +49,8 @@
   ([port] (connect port "localhost"))
   ([port host]
      (let [socket (create-socket port host)
+           ;; TODO: pass transducers into
+           ;;       connect fn so that code is more reusable
            process-ch (chan 10 (map parse-response))
            write-ch (chan 10 (map event->command))
            read-ch (chan)
@@ -74,6 +76,8 @@
        (.on socket "data"
             (fn [data] (put! buffer-ch (str data))))
 
+       ;; TODO: abstract this code out of connect fn
+       ;;       so that it is more generic/reusable
        (go-loop [data ""]
          (let [data (str data (<! buffer-ch))
                lines (split data #"\n")]

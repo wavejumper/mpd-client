@@ -36,7 +36,7 @@
        (->> rest (join ":") trim read-string*)])))
 
 (defn response->edn
-  "Transforms a response from server to EDN friendly format
+  "Transforms a response from server into EDN friendly format
 
   Returns a collection if there are duplicate keys in response
   If there are no duplicate keys then a hash-map is returned"
@@ -83,9 +83,10 @@
 (defn pad
   "Prepends 0 to x, n - x times"
   [x n]
-  (let [x (str x)]
-    (if (< (count x) n)
-      (let [padding (- n (count x))]
+  (let [x (str x)
+        x-count (count x)]
+    (if (< x-count n)
+      (let [padding (- n x-count)]
         (loop [x x i 0]
           (if (= i padding)
             x
@@ -95,4 +96,4 @@
 (defn ms->minute [x]
   (str (.floor js/Math (/ x 60))
        ":"
-       (pad (.ceil js/Math (mod x 60)) 2)))
+       (pad (.floor js/Math (mod x 60)) 2)))
