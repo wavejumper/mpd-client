@@ -32,13 +32,20 @@
                                 :options {:target target})
 
        ;; Subscriptions to MPD
-       :subscriber (modules/new-subscriber :subscriptions subscription-service
-                                           :topic-fn #(:command %))
-       :idle-subscriber (modules/new-subscriber :subscriptions idle-subscription-service
-                                                :topic-fn #(:command %))
+       :subscriber
+       (modules/new-subscriber :subscriptions subscription-service
+                               :topic-fn #(:command %))
+       :idle-subscriber
+       (modules/new-subscriber :subscriptions idle-subscription-service
+                               :topic-fn #(:command %))
+
+       ;; Controller
        :event-bus (modules/new-event-bus :controls control-event
                                          :post-controls! post-control-event!)
+
+       ;; Key bindings
        :key-binder (modules/new-key-binder :key-bindings key-service)
+
        ;; Schedules
        :status-poll
        (modules/new-scheduler :timeout 1000
@@ -50,6 +57,7 @@
        (modules/new-scheduler :timeout nil
                               :scheduled-fn schedules/idle))
 
+      ;; System dependencies
       (component/system-using
        {:om {:root-cursor :root-cursor
              :event-bus :event-bus

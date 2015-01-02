@@ -1,4 +1,6 @@
 (ns zirconia.controllers.post-controls
+  "All side effects such as API calls, manual DOM updates etc are
+  centralized to the post controller"
   (:require [cljs.core.async :as async :refer [<! >! put!]])
   (:require-macros [cljs.core.async.macros :refer (go go-loop)]))
 
@@ -37,7 +39,7 @@
     (condp = (:changed data)
       "update"
       (let [show (get-in state [:view-settings :list :show])
-            group (get-in state [:view-setings :list :group])]
+            group (get-in state [:view-settings :list :group])]
         (put! socket {:command :playlistinfo})
         (put! socket {:command :status})
         (put! socket {:command :list

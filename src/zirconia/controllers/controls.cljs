@@ -1,4 +1,5 @@
 (ns zirconia.controllers.controls
+  "All state changes are centralized to the control-event"
   (:require [plumbing.core :as plumbing :refer-macros (?>)]))
 
 (defmulti control-event
