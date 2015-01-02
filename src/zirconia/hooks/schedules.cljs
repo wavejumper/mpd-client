@@ -9,3 +9,7 @@
 (defn get-playlist [owner]
   (let [socket (get-in owner [:socket :chan])]
     (put! socket {:command :playlistinfo})))
+
+(defn idle [owner]
+  (let [socket (get-in owner [:socket :chan])]
+    (put! socket {:command :idle})))

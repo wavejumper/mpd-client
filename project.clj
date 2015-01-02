@@ -12,7 +12,9 @@
                  [sablono "0.2.22"]
                  [kibu/component "0.2.3-SNAPSHOT"]
                  [prismatic/schema "0.3.3"]
-                 [prismatic/om-tools "0.3.9"]]
+                 [prismatic/om-tools "0.3.9"]
+                 [prismatic/plumbing "0.3.5"]
+                 [com.andrewmcveigh/cljs-time "0.3.0"]]
 
   :profiles
   {:dev {:dependencies [[com.cemerick/piggieback "0.1.3"]

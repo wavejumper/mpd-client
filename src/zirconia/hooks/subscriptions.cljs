@@ -15,4 +15,12 @@
      :pause ->event-bus
      :clear ->event-bus
      :list ->event-bus
+     :find ->event-bus
+     :lsinfo ->event-bus
      :next ->event-bus}))
+
+(defn idle-subscription-service [owner]
+  (let [event-bus (get-in owner [:event-bus :chan])
+        ->event-bus (fn [{:keys [command args response]}]
+                      (put! event-bus [command response args]))]
+    {:idle ->event-bus}))

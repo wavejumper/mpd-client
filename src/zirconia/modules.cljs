@@ -5,7 +5,7 @@
             [com.stuartsierra.component :as component]
             [om.core :as om :include-macros true]
             [cljs.core.async :as async :refer (chan <! >! close! pub)])
-(:require-macros [cljs.core.async.macros :refer (go-loop alt!)]))
+  (:require-macros [cljs.core.async.macros :refer (go-loop alt!)]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Socket component
@@ -30,14 +30,14 @@
 (defrecord EventBus [controls post-controls!]
   component/Lifecycle
   (start [component]
-    (let [event-bus (chan)
-          state (get-in component [:root-cursor :atom])
-          socket (get-in component [:socket :chan])]
+    (let [event-bus (chan)]
       (go-loop []
-        (let [options (<! event-bus)
-              prev-state @state]
+        (let [state (get-in component [:root-cursor :atom])
+              options (<! event-bus)
+              prev-state @state
+              owner (dissoc component :root-cursor)]
           (swap! state (partial controls options))
-          (post-controls! options {:event-bus event-bus :socket socket} prev-state @state)
+          (post-controls! options owner prev-state @state)
           (recur)))
       (assoc component :chan event-bus)))
 
@@ -52,6 +52,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Scheduler
+;; Schedules a task to be run every x ms. If no timeout is provided, the
+;; scheduled-fn will run once
 
 (defrecord Scheduler [timeout scheduled-fn]
   component/Lifecycle
@@ -59,15 +61,16 @@
     (let [close-ch (chan)]
       (go-loop []
         (scheduled-fn component)
-        (alt!
-          (async/timeout timeout) ([_] (recur))
-          close-ch ([_] nil)))
+        (when timeout
+          (alt!
+            (async/timeout timeout) ([_] (recur))
+            close-ch ([_] nil))))
       (assoc component :close-ch close-ch)))
 
   (stop [component]
     (when-let [close-ch (:close-ch component)]
-      (close! close-ch)
-      (dissoc component :close-ch))))
+      (close! close-ch))
+    (dissoc component :close-ch)))
 
 (defn new-scheduler [& {:keys [timeout scheduled-fn] :as opts}]
   (map->Scheduler opts))

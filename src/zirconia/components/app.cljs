@@ -54,31 +54,41 @@
           [:strong row]
           [:span row])])])))
 
+(defcomponentk list
+  [[:data results settings :as app]
+   [:shared socket]]
+
+  (render
+   [_]
+   (let [group (keyword (:group settings))
+         show (keyword (:show settings))]
+     (html
+      [:div
+       [:pre (pr-str settings)]
+       [:ul {:key "browse"}
+        (for [result (sort-by group results)
+              :when (not (empty? (show result)))]
+          [:li (group result) " - " (show result)])]]))))
+
 (defcomponentk view-tabs
-  [[:data view :as app]
+  [[:data view views :as app]
    [:shared event-bus]]
 
   (render
    [_]
    (html
     [:ul {:key "view-tabs"}
-     [:li
-      {:key "view-playlist"
-       :on-click #(put! event-bus [:change-view :playlist])}
-      (if (= view :playlist)
-        [:strong "Playlist"]
-        [:span "Playlist"])]
-
-     [:li
-      {:key "view-browse"
-       :on-click #(put! event-bus [:change-view :browse])}
-      (if (= view :browse)
-        [:strong "Browse"]
-        [:span "Browse"])]])))
+     (for [v views]
+       [:li
+        {:key (str "view-" (name v))
+         :on-click #(put! event-bus [:change-view v])}
+        (if (= view v)
+          [:strong (name v)]
+          [:span (name v)])])])))
 
 (defcomponentk root
   "Root component of application"
-  [[:data view status playlist cache :as app]
+  [[:data view views view-settings status cache :as app]
    [:shared event-bus]]
 
   (render
@@ -89,16 +99,16 @@
       [:div
        [:pre (pr-str status)]
 
-       [:pre
-        {:width "100px"}
-        (pr-str cache)]
-
-       (->view-tabs {:view view})
+       (->view-tabs {:view view :views views})
 
        (condp = view
          :playlist
-         (->playlist {:playlist playlist
+         (->playlist {:playlist (:playlist cache)
                       :playingid playingid})
+
+         :list
+         (->list {:results (get-in cache [:list (:list view-settings)])
+                  :settings (:list view-settings)})
 
          ;; else
          [:div "No such view " (str view)])

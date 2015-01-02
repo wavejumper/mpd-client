@@ -1,4 +1,5 @@
-(ns zirconia.controllers.controls)
+(ns zirconia.controllers.controls
+  (:require [plumbing.core :as plumbing :refer-macros (?>)]))
 
 (defmulti control-event
   (fn [[event & args] state] event))
@@ -41,15 +42,40 @@
                      (into {}))]
     (-> state
         (update-in [:cache :songid] #(merge % songids))
-        (assoc :playlist data))))
+        (assoc-in [:cache :playlist] data))))
 
 (defmethod control-event :next [_ state]
   (assoc-in state [:status :songid]
             (get-in state [:status :nextsongid])))
 
 (defmethod control-event :clear [[event & _] state]
-  (assoc state :playlist []))
+  (assoc-in state [:cache :playlist] []))
 
 (defmethod control-event :list [[event data _] state]
-  ;; TODO: ???
-  (assoc-in state [:cache :list] data))
+  (let [settings (get-in state [:view-settings :list])]
+    (assoc-in state [:cache :list settings] data)))
+
+(defmethod control-event :find [[event data _] state]
+  (let [songids (->> data
+                     (map (fn [x] [(:id x) x]))
+                     (into {}))]
+    (-> state
+        (update-in [:cache :songid] #(merge % songids)))))
+
+(defmethod control-event :lsinfo [[event data _] state]
+  (let [songids (->> data
+                     (filter :file)
+                     (map (fn [x] [(:id x) x]))
+                     (into {}))
+        uri (get-in state [:view-settings :browse :uri])]
+    (-> state
+        (update-in [:cache :songid] #(merge % songids))
+        (update-in [:cache :lsinfo uri] data))))
+
+(defmethod control-event :idle [[event data _] state]
+  (condp = (:changed data)
+    "update"
+    (assoc state :cache {})
+
+    ;; else
+    state))

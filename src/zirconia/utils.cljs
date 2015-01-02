@@ -66,12 +66,12 @@
        (response->edn)))
 
 (defn event->command
-  "Transforms an event hash-map with keys :command, :args into a raw request string"
+  "Transforms an event hash-map with keys :command, :args into a request string"
   [{:keys [command args]}]
   (str (name command) " " (join " " args) "\n"))
 
 (defn command->event
-  "Transforms a raw request string back into its hash-map equivalent"
+  "Transforms a request string back into its hash-map equivalent"
   [data]
   (let [[command & args] (-> data (split #"\n") first trim (split #" "))]
     {:command (keyword command)
