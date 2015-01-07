@@ -85,8 +85,7 @@
 
        (.on socket "connect"
             (fn []
-              (.log js/console (str "Connected to MPD: " host ":" port))
-              (close! open-ch)))
+              (.log js/console (str "Connected to MPD: " host ":" port))))
 
        (.on socket "error"
             (fn [error]
@@ -106,6 +105,7 @@
              #"^OK MPD.*"
              (do
                (.log js/console data)
+               (close! open-ch)
                (>! read-ch {:command :ok-mpd
                             :args []
                             :response data})
