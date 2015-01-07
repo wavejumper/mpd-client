@@ -54,7 +54,7 @@
           [:strong row]
           [:span row])])])))
 
-(defcomponentk list
+(defcomponentk list-view
   [[:data results settings :as app]
    [:shared socket]]
 
@@ -107,8 +107,8 @@
                       :playingid playingid})
 
          :list
-         (->list {:results (get-in cache [:list (:list view-settings)])
-                  :settings (:list view-settings)})
+         (->list-view {:results (get-in cache [:list (:list view-settings)])
+                       :settings (:list view-settings)})
 
          ;; else
          [:div "No such view " (str view)])

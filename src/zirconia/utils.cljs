@@ -49,8 +49,8 @@
              x []]
         (if (empty? data)
           (conj x (into {} next-col))
-          ;; for beats tags when duplicate keys returned
-          ;; for the same record :\
+          ;; when duplicate keys get returned
+          ;; in the same record :\
           (let [next-key (ffirst data)]
             (if (= prev-key next-key)
               (recur (rest data) next-col prev-key x)
