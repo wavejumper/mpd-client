@@ -13,3 +13,5 @@ pom.xml.asc
 \#*\#
 *.swp
 .repl/
+.vagrant/
+resources/public/js/compiled/*
