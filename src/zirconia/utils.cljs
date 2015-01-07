@@ -43,16 +43,28 @@
   [data]
   (let [keys (map first data)]
     (if (not= (count keys) (count (distinct keys)))
-      (loop [data data next-col [] x []]
+      (loop [data data
+             next-col []
+             prev-key nil
+             x []]
         (if (empty? data)
           (conj x (into {} next-col))
-          (if (some #{(ffirst data)} (map first next-col))
-            (recur (rest data)
-                   [(first data)]
-                   (conj x (into {} next-col)))
-            (recur (rest data)
-                   (conj next-col (first data))
-                   x))))
+          ;; for beats tags when duplicate keys returned
+          ;; for the same record :\
+          (let [next-key (ffirst data)]
+            (if (= prev-key next-key)
+              (recur (rest data) next-col prev-key x)
+              ;; if previous key already exists in record
+              ;; move on to next
+              (if (some #{next-key} (map first next-col))
+                (recur (rest data)
+                       [(first data)]
+                       next-key
+                       (conj x (into {} next-col)))
+                (recur (rest data)
+                       (conj next-col (first data))
+                       next-key
+                       x))))))
 
       (into {} data))))
 
