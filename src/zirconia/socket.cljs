@@ -55,26 +55,46 @@
            write-ch (chan 10 (map event->command))
            read-ch (chan)
            buffer-ch (chan)
+           open-ch (chan)
            socket-ch (socket-chan read-ch
                                   write-ch
                                   {:on-close (fn [] (close-socket socket))})]
 
-       (go-loop []
-         ;; process one command at a time
-         (let [command (<! write-ch)
-               block-ch (chan)]
-           (.write socket command
-                   (fn []
-                     (go
-                       (let [response (<! process-ch)
-                             event (command->event command)]
-                         (>! read-ch (assoc event :response response))
-                         (close! block-ch)))))
-           (<! block-ch)
-           (recur)))
+       (go-loop [connection false]
+         ;; wait until open connection
+         (if-not connection
+           (do (<! open-ch)
+               (recur true))
+
+           ;; process one command at a time
+           (let [command (<! write-ch)
+                 block-ch (chan)]
+             (.write socket command
+                     (fn []
+                       (go
+                         (let [response (<! process-ch)
+                               event (command->event command)]
+                           (>! read-ch (assoc event :response response))
+                           (close! block-ch)))))
+             (<! block-ch)
+             (recur true))))
 
        (.on socket "data"
-            (fn [data] (put! buffer-ch (str data))))
+            (fn [data]
+              (put! buffer-ch (str data))))
+
+       (.on socket "connect"
+            (fn []
+              (.log js/console (str "Connected to MPD: " host ":" port))
+              (close! open-ch)))
+
+       (.on socket "error"
+            (fn [error]
+              (.log js/console (pr-str error))))
+
+       (.on socket "close"
+            (fn [_]
+              (.log js/console "Connection to MPD closed")))
 
        ;; TODO: abstract this code out of connect fn
        ;;       so that it is more generic/reusable
@@ -85,6 +105,7 @@
 
              #"^OK MPD.*"
              (do
+               (.log js/console data)
                (>! read-ch {:command :ok-mpd
                             :args []
                             :response data})
@@ -92,7 +113,7 @@
 
              #"^ACK"
              (do
-               (.log js/console data)
+               (.log js/console (str "ACK: " data))
                (recur ""))
 
              #"^OK$"
